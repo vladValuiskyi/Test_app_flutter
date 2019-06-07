@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:test_app/models/photo.dart';
-import 'package:test_app/views/settings_button.dart';
 
 class PhotoPage extends StatefulWidget {
   final List<Photo> photos;

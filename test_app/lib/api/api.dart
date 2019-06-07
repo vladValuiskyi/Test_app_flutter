@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:test_app/api/database_helper.dart';
 import 'package:test_app/models/album.dart';
 import 'package:test_app/models/comment.dart';
 import 'package:test_app/models/photo.dart';
@@ -26,26 +28,46 @@ class ApiRequests {
     }).toList();
   }
 
+  DatabaseHelper databaseHelper = DatabaseHelper();
+
   Future<List<Post>> getPosts() async {
-    http.Response response =
-        await http.get('https://jsonplaceholder.typicode.com/posts');
+    try {
+      http.Response response =
+          await http.get('https://jsonplaceholder.typicode.com/posts');
 
-    List<dynamic> rawList = json.decode(response.body);
+      List<dynamic> rawList = json.decode(response.body);
 
-    return rawList.map<Post>((dynamic raw) {
-      return Post.fromMap(raw as Map<String, dynamic>);
-    }).toList();
+      return rawList.map<Post>((dynamic raw) {
+        Post newPost =  Post.fromMap(raw as Map<String, dynamic>);
+        databaseHelper.savePost(newPost);
+        return newPost;
+      }).toList();
+    } on SocketException catch (_) {
+      print('NotConnected');
+      var list = databaseHelper.getAllPosts();
+      print(databaseHelper.getAllPosts().toString());
+      return list;
+    }
   }
 
   Future<List<Comment>> getComments() async {
-    http.Response response =
-        await http.get('https://jsonplaceholder.typicode.com/comments');
+    try {
+      http.Response response =
+          await http.get('https://jsonplaceholder.typicode.com/comments');
 
-    List<dynamic> rawList = json.decode(response.body);
+      List<dynamic> rawList = json.decode(response.body);
 
-    return rawList.map<Comment>((dynamic raw) {
-      return Comment.fromMap(raw as Map<String, dynamic>);
-    }).toList();
+      return rawList.map<Comment>((dynamic raw) {
+        Comment newComment =  Comment.fromMap(raw as Map<String, dynamic>);
+        databaseHelper.saveComment(newComment);
+        return newComment;
+      }).toList();
+    } on SocketException catch (_) {
+      print('NotConnected');
+      var list = databaseHelper.getAllComments();
+      print(databaseHelper.getAllComments().toString());
+      return list;
+    }
   }
 
   Future<Map<Post, List<Comment>>> getPostsWithComments() async {
